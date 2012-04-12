@@ -26,7 +26,7 @@ BOOL EnumLangsFunc(HMODULE hModule, LPTSTR lpType, LPTSTR lpName, WORD wLang, LO
 HMODULE loadLibraryEx(LPCTSTR lpFileName, HANDLE hFile, DWORD dwFlags);
 bool removeResource(QString exePath,  QString lpType, QString resourceName);
 bool addResourceBITMAP(QString executablePath, QString resourceName, QString resourcePath);
-bool addResourceICO(QString executablePath, QString resourceName, QString resourcePath);
+bool replaceResourceICO(QString executablePath, QString resourceName, QString resourcePath);
 
 namespace icons
 {
@@ -245,32 +245,31 @@ namespace icons
 		hUpdate = BeginUpdateResourceA(lpFileName, FALSE); //false sa nu stearga resursele neupdated
 		if(hUpdate==NULL)
 			{
-			QTextStream(stdout, QIODevice::WriteOnly) << "eroare BeginUpdateResource" << lpFileName << "\n";
+			QTextStream(stdout, QIODevice::WriteOnly) << "erreur BeginUpdateResource " << lpFileName << "\n";
 			res=false;
 			}
 		//aici e cu lang NEUTRAL
 		//res=UpdateResource(hUpdate,RT_GROUP_ICON,MAKEINTRESOURCE(6000),langId,lpGrpIconDir,cbRes);
 		res=UpdateResource(hUpdate,RT_GROUP_ICON,lpName,langId,temp,cbRes);
 		if(res==false)
-			QTextStream(stdout, QIODevice::WriteOnly) << "eroare UpdateResource RT_GROUP_ICON" << lpFileName << "\n";
+			QTextStream(stdout, QIODevice::WriteOnly) << "erreur UpdateResource RT_GROUP_ICON " << lpFileName << "\n";
 
 		for(i=0;i<lpGrpIconDir->idCount;i++)
 			{
 			res=UpdateResource(hUpdate,RT_ICON,MAKEINTRESOURCE(lpGrpIconDir->idEntries[i].nID),langId,pIconImage[i],lpGrpIconDir->idEntries[i].dwBytesInRes);
 			if(res==false)
-				QTextStream(stdout, QIODevice::WriteOnly) << "eroare UpdateResource RT_ICON" << lpFileName << "\n";
+				QTextStream(stdout, QIODevice::WriteOnly) << "erreur UpdateResource RT_ICON " << lpFileName << "\n";
 			}
 
-		for(i=lpGrpIconDir->idCount;i<lpInitGrpIconDir->idCount;i++)
+		for(i=lpGrpIconDir->idCount;i<lpInitGrpIconDir->idCount;++i)
 			{
-			res=UpdateResource(hUpdate,RT_ICON,MAKEINTRESOURCE(lpInitGrpIconDir->idEntries[i].nID),langId,"",0);
+			res=UpdateResource(hUpdate,RT_ICON,MAKEINTRESOURCE(lpInitGrpIconDir->idEntries[i].nID),langId,NULL,0);
 			if(res==false)
-				QTextStream(stdout, QIODevice::WriteOnly) << "eroare stergere resurse vechi" << lpFileName << "\n";	
+				QTextStream(stdout, QIODevice::WriteOnly) << "erreur to delete resource " << lpFileName << "\n";	
 			}
 
 		if(!EndUpdateResource(hUpdate,FALSE)) //false ->resource updates will take effect.
 			QTextStream(stdout, QIODevice::WriteOnly) << "eroare EndUpdateResource" << lpFileName << "\n";
-
 
 		//	FreeResource(hGlobal);
 		delete[] lpGrpIconDir->idEntries;
@@ -301,30 +300,24 @@ namespace resources
 	QList<Resource> Resources;
 
 	QString convertToString(LPTSTR value)
-		{
-			QString newValue;
-			if (!IS_INTRESOURCE(value))
-				{
-				newValue = QString("%1").arg((char*) value);
-				}
-			else
-				{
-				newValue = QString("%1").arg((USHORT) value);
-				}
-			return newValue;
-		}
+	{
+		QString newValue;
+		if (!IS_INTRESOURCE(value))
+			{
+			newValue = QString("%1").arg((char*) value);
+			}
+		else
+			{
+			newValue = QString("%1").arg((USHORT) value);
+			}
+		return newValue;
+	}
 }
 
 
 // ----------------------------------------------------------------------------------
 int main(int argc, char* argv[])
 {
-	HGLOBAL hResLoad;   // handle to loaded resource
-	HMODULE hExe;       // handle to existing .EXE file
-	HRSRC hRes;         // handle/ptr. to res. info. in hExe
-	HANDLE hUpdateRes;  // update resource handle
-	LPVOID lpResLock;   // pointer to resource data
-
 	ctkCommandLineParser commandLine;
 	commandLine.setArgumentPrefix("--", "-");
 
@@ -356,6 +349,7 @@ int main(int argc, char* argv[])
 		}
 
 	char* exePath;
+	HMODULE hExe;       // handle to existing .EXE file
 
 	if(parsedArgs.contains("list-resources") || parsedArgs.contains("l"))
 		{
@@ -419,7 +413,7 @@ int main(int argc, char* argv[])
 		{
 		QStringList arguments = parsedArgs.value("update-resource-ico").toStringList();
 
-		bool result = addResourceICO(arguments.at(0), arguments.at(1), arguments.at(2));
+		bool result = replaceResourceICO(arguments.at(0), arguments.at(1), arguments.at(2));
 		if(!result)
 			{
 			QTextStream(stdout, QIODevice::WriteOnly) << "Resource ico couldn't be updated.\n";
@@ -603,7 +597,7 @@ bool addResourceBITMAP(QString executablePath, QString resourceName, QString res
 }
 
 // ----------------------------------------------------------------------------------
-bool addResourceICO(QString executablePath, QString resourceName, QString resourcePath)
+bool replaceResourceICO(QString executablePath, QString resourceName, QString resourcePath)
 {
 	char* resPath = (char*) malloc(strlen(resourcePath.toStdString().c_str()) * sizeof(char));
 	strcpy(resPath, resourcePath.toStdString().c_str());
