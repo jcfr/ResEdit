@@ -7,7 +7,7 @@ set(resedit_binary_dir "@RESEDIT_BINARY_DIR@")
 set(resedit_source_dir "@RESEDIT_SOURCE_DIR@")
 
 # --------------------------------------------------------------------------
-# Recover the Buld Type
+# Recover the Build Type
 set(build_types
 	"Debug"
 	"MinSizeRel"
@@ -44,6 +44,20 @@ set(App4Test_Path ${App4Test_Dir}/${App4Test_Name}.exe)
 
 if (NOT EXISTS ${App4Test_Path})
   message(FATAL_ERROR "Application ${App4Test_Path} doesn't exists !")
+endif()
+
+# --------------------------------------------------------------------------
+# Set application without resource variable
+
+set(App4Test_WR_Dir "${resedit_binary_dir}/Testing/${resedit_build_type}")
+set(App4Test_WR_Name App4Test_Without_Resource)
+set(App4Test_WR_Path ${App4Test_WR_Dir}/${App4Test_WR_Name}.exe)
+
+# --------------------------------------------------------------------------
+# Check if application exists
+
+if (NOT EXISTS ${App4Test_WR_Path})
+  message(FATAL_ERROR "Application ${App4Test_WR_Path} doesn't exists !")
 endif()
 
 # --------------------------------------------------------------------------

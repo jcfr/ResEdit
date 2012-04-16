@@ -26,7 +26,7 @@ BOOL EnumLangsFunc(HMODULE hModule, LPTSTR lpType, LPTSTR lpName, WORD wLang, LO
 HMODULE loadLibraryEx(LPCTSTR lpFileName, HANDLE hFile, DWORD dwFlags);
 bool removeResource(QString exePath,  QString lpType, QString resourceName);
 bool addResourceBITMAP(QString executablePath, QString resourceName, QString resourcePath);
-bool replaceResourceICO(QString executablePath, QString resourceName, QString resourcePath);
+bool updateResourceICO(QString executablePath, QString resourceName, QString resourcePath);
 
 namespace icons
 {
@@ -152,12 +152,21 @@ namespace icons
 		temp1=test1;
 	//	temp1=new BYTE[118];
 	//	CopyMemory(temp1,test1,118);
-		lpInitGrpIconDir->idReserved=(WORD)*test1;
-		test1=test1+sizeof(WORD);
-		lpInitGrpIconDir->idType=(WORD)*test1;
-		test1=test1+sizeof(WORD);
-		lpInitGrpIconDir->idCount=(WORD)*test1;
-		test1=test1+sizeof(WORD);
+		if (test1)
+			{
+			lpInitGrpIconDir->idReserved=(WORD)*test1;
+			test1=test1+sizeof(WORD);
+			lpInitGrpIconDir->idType=(WORD)*test1;
+			test1=test1+sizeof(WORD);
+			lpInitGrpIconDir->idCount=(WORD)*test1;
+			test1=test1+sizeof(WORD);
+			}
+		else
+			{
+			lpInitGrpIconDir->idReserved=0;
+			lpInitGrpIconDir->idType=1;
+			lpInitGrpIconDir->idCount=0;
+			}
 
 		lpInitGrpIconDir->idEntries=new MEMICONDIRENTRY[lpInitGrpIconDir->idCount];
 
@@ -413,7 +422,7 @@ int main(int argc, char* argv[])
 		{
 		QStringList arguments = parsedArgs.value("update-resource-ico").toStringList();
 
-		bool result = replaceResourceICO(arguments.at(0), arguments.at(1), arguments.at(2));
+		bool result = updateResourceICO(arguments.at(0), arguments.at(1), arguments.at(2));
 		if(!result)
 			{
 			QTextStream(stdout, QIODevice::WriteOnly) << "Resource ico couldn't be updated.\n";
@@ -597,7 +606,7 @@ bool addResourceBITMAP(QString executablePath, QString resourceName, QString res
 }
 
 // ----------------------------------------------------------------------------------
-bool replaceResourceICO(QString executablePath, QString resourceName, QString resourcePath)
+bool updateResourceICO(QString executablePath, QString resourceName, QString resourcePath)
 {
 	char* resPath = (char*) malloc(strlen(resourcePath.toStdString().c_str()) * sizeof(char));
 	strcpy(resPath, resourcePath.toStdString().c_str());

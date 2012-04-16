@@ -158,7 +158,7 @@ foreach(Not_Expected_OUTPUT_Line ${Not_Expected_OUTPUT_Lines})
 	string(FIND "${ov}" ${Not_Expected_OUTPUT_Line} pos)
   if(NOT ${pos} STREQUAL -1)
     message(FATAL_ERROR "Test Update Ico - Problem with flag --update-resource-ico"
-												"Expected_ov_line:${Not_Expected_OUTPUT_Line} "
-                        "Not found in current_ov:${ov}")
+												"Non_Expected_ov_line:${Not_Expected_OUTPUT_Line} "
+                        "Found in current_ov:${ov}")
   endif()
 endforeach()

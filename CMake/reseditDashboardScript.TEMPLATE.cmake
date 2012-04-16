@@ -114,7 +114,5 @@ endmacro()
 #set(url https://github.com/benjaminlong/ResEdit/blob/master/CMake/reseditDashboardDriverScript.cmake)
 set(dest ${CTEST_SCRIPT_DIRECTORY}/${CTEST_SCRIPT_NAME}.driver)
 #downloadfile(${url} ${dest})
-message("CTEST_SCRIPT_DIRECTORY : ${CTEST_SCRIPT_DIRECTORY}")
-message("CTEST_SCRIPT_NAME : ${CTEST_SCRIPT_NAME}")
 include(${dest})
 

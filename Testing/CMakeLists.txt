@@ -27,6 +27,7 @@ set(App4Test_Resources
 # --------------------------------------------------------------------------
 # Create app for test
 ADD_EXECUTABLE(${PROJECT_NAME} ${SRCS} ${App4Test_Resources})
+ADD_EXECUTABLE(${PROJECT_NAME}_Without_Resource ${SRCS})
 
 # --------------------------------------------------------------------------
 # Helper macro
@@ -44,4 +45,5 @@ endmacro()
 resedit_add_test(ResEditNoCommandTest)
 resedit_add_test(ResEditCommandHelpTest)
 resedit_add_test(ResEditCommandListTest)
-resedit_add_test(ResEditCommandUpdateIcoTest)
+resedit_add_test(ResEditCommandUpdateIcoOnExeWithIcoTest)
+resedit_add_test(ResEditCommandUpdateIcoOnExeWithoutIcoTest)
