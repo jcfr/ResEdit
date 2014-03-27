@@ -6,55 +6,65 @@ Overview
 
 ResEdit is an open source application to delete/update/add resources to an Executable or DLL
 
+
+Examples
+--------
+
+* To change the current ico file:
+```
+ResEdit --update-resource-ico Path/to/the/exe/or/dll IDI_ICON1 Path/to/the/ico/resource
+```
+
+* To list all resources:
+```
+ResEdit --list-resources Path/to/the/exe/or/dll
+```
+
+Usage
+-----
+
+```
+CTKResEdit.exe --help
+
+Option
+  -h, --help              Display available command line arguments.
+  -l, --list-resources    List all resources of an executable or library.
+  --add-resource-bitmap   Add resource using the provided <path/to/exec/or/lib> <resourceName> and <path/to/resource>
+  --update-resource-ico   Add resource using the provided <path/to/exec/or/lib> <resourceName> and <path/to/resource>
+  --delete-resource       Delete resource using the provided <path/to/exec/or/lib> <resourceType> <resourceName>
+```
+
 Prerequistes
 ------------
 
-Qt need to be compiled in static !
-
-Otherwise after compiled the project, add new file SetEnv.bat into the executable directory.
-
-SetEnv.bat contains following two lines :
-
-```
-@ECHO OFF
-set PATH=C:\work\Qt\qt-everywhere-opensource-src-4.7.3\bin;%PATH% //link to Qt/bin
-```
-
+* Qt >= 4.7
+* CMake >= 2.8.2 - http://cmake.org
+* Visual Studio >= 2008
+* Git - http://git-scm.com/downloads
 
 Checkout, Configure and Build
 -----------------------------
 
-Use the following git command line to checkout the project :
-
-    git clone git://github.com/benjaminlong/ResEdit.git ResEdit
-
-Then use cmake to configure and build.
-
-Run
----
-**1/ Go to the executable directory.**
-
-If you have create the file SetEnv.bat, run the following command line first:
-
-    SetEnv.bat
-
-**2/ Now you can run the application.**
-
-Some examples of command lines :
-
-* To show all the command lines:
+1. Start Git bash
+2. Execute the following commands:
 
 ```
-ResEdit --help
+git clone git://github.com/jcfr/ResEdit.git CTKResEdit
+mkdir CTKResEdit-Release
+cmake -G "Visual Studio 9 2008" ../CTKResEdit
+cmake --build . --config Release
 ```
-* To list all resources:
+
+Test
+----
+
+1. Start Windows cmd line
+2. Execute the following commands:
 
 ```
-ResEdit --list-resources Path/to/the/exe/or/dll
-ResEdit -l Path/to/the/exe/or/dll
+cd \path\to\CTKResEdit-Release
+.\SetEnv.bat
+.\Release\CTKResEdit.exe --help
+cmake --build . --config Release --target RUN_TESTS
 ```
-* To change the current ico file:
 
-```
-ResEdit --update-resource-ico Path/to/the/exe/or/dll ResourceName Path/to/the/ico/resource
-```
