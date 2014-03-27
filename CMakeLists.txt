@@ -107,3 +107,12 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${QT_LIBRARIES})
 IF(BUILD_TESTING)
   ADD_SUBDIRECTORY(Testing)
 ENDIF()
+
+# --------------------------------------------------------------------------
+# Configure launcher
+#
+get_filename_component(QT_SHARED_LIBRARY_PATH_CONFIG ${QT_QMAKE_EXECUTABLE} PATH)
+configure_file(
+  SetEnv.bat.in
+  ${CMAKE_BINARY_DIR}/SetEnv.bat
+  )
