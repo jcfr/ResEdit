@@ -372,8 +372,8 @@ int main(int argc, char* argv[])
 		{
 		// Load the .EXE file that contains the dialog box you want to copy.
 		exePath =
-			(char*) malloc(strlen(parsedArgs.value("list-resources").toString().toStdString().c_str()) * sizeof(char));
-		strcpy(exePath, parsedArgs.value("list-resources").toString().toStdString().c_str());
+			(char*) malloc(strlen(parsedArgs.value("list-resources").toString().toLatin1()) * sizeof(char));
+		strcpy(exePath, parsedArgs.value("list-resources").toString().toLatin1());
 		hExe = loadLibraryEx(TEXT(exePath), NULL, LOAD_LIBRARY_AS_IMAGE_RESOURCE);
 
 		// List all resources
@@ -397,8 +397,8 @@ int main(int argc, char* argv[])
 	else if(parsedArgs.contains("delete-resource"))
 		{
 		QStringList arguments = parsedArgs.value("delete-resource").toStringList();
-		exePath = (char*) malloc(strlen(arguments.at(0).toStdString().c_str()) * sizeof(char));
-		strcpy(exePath, arguments.at(0).toStdString().c_str());
+		exePath = (char*) malloc(strlen(arguments.at(0).toLatin1()) * sizeof(char));
+		strcpy(exePath, arguments.at(0).toLatin1());
 		hExe = loadLibraryEx(TEXT(exePath), NULL, LOAD_LIBRARY_AS_IMAGE_RESOURCE);
 
 		// List all resources
@@ -502,8 +502,8 @@ HMODULE loadLibraryEx(LPCTSTR lpFileName, HANDLE hFile, DWORD dwFlags)
 // ----------------------------------------------------------------------------------
 bool removeResource(QString executablePath, QString resourceType, QString resourceName)
 {
-	char* exePath = (char*) malloc(strlen(executablePath.toStdString().c_str()) * sizeof(char));
-		strcpy(exePath, executablePath.toStdString().c_str());
+	char* exePath = (char*) malloc(strlen(executablePath.toLatin1()) * sizeof(char));
+		strcpy(exePath, executablePath.toLatin1());
 	// Start Update
 	HANDLE hUpdateRes = BeginUpdateResource(TEXT(exePath), FALSE);
 	if (hUpdateRes == NULL)
@@ -518,8 +518,8 @@ bool removeResource(QString executablePath, QString resourceType, QString resour
 	bool result = false;
 	if (resourceName.toInt() == 0)
 		{
-		char* name = (char*) malloc(strlen(resourceName.toStdString().c_str()) * sizeof(char));
-		strcpy(name, resourceName.toStdString().c_str());
+		char* name = (char*) malloc(strlen(resourceName.toLatin1()) * sizeof(char));
+		strcpy(name, resourceName.toLatin1());
 		qDebug() << "not int :" << resourceName << resourceType << name;
 		result = UpdateResource(hUpdateRes, MAKEINTRESOURCE(type), name, MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US), NULL, 0);
 		}
@@ -550,8 +550,8 @@ bool addResourceBITMAP(QString executablePath, QString resourceName, QString res
 {
 	// Load file
 	// Get the bmp into memory
-	char* resPath = (char*) malloc(strlen(resourcePath.toStdString().c_str()) * sizeof(char));
-	strcpy(resPath, resourcePath.toStdString().c_str());
+	char* resPath = (char*) malloc(strlen(resourcePath.toLatin1()) * sizeof(char));
+	strcpy(resPath, resourcePath.toLatin1());
 	//HANDLE hIcon = LoadImage(NULL, TEXT(resPath), IMAGE_ICON, 0, 0, LR_LOADFROMFILE|LR_DEFAULTSIZE);
 	//LPVOID lpResLock = LockResource(hIcon);
 
@@ -577,8 +577,8 @@ bool addResourceBITMAP(QString executablePath, QString resourceName, QString res
 	DWORD NewFileSize = FileSize - sizeof(BITMAPFILEHEADER);
 
 	// Write in the new resources
-	char* exePath = (char*) malloc(strlen(executablePath.toStdString().c_str()) * sizeof(char));
-	strcpy(exePath, executablePath.toStdString().c_str());
+	char* exePath = (char*) malloc(strlen(executablePath.toLatin1()) * sizeof(char));
+	strcpy(exePath, executablePath.toLatin1());
 	// Start Update
 	HANDLE hUpdateRes = BeginUpdateResource(TEXT(exePath), FALSE);
 	if (hUpdateRes == NULL)
@@ -587,12 +587,12 @@ bool addResourceBITMAP(QString executablePath, QString resourceName, QString res
     return false;
 		}
 
-	qDebug() << "name" << resourceName.toStdString().c_str();
+	qDebug() << "name" << resourceName.toLatin1();
 	qDebug() << "path " << resourcePath;
 	// update resouce.
 	bool result = UpdateResource(hUpdateRes,
 										RT_ICON,
-										TEXT(resourceName.toStdString().c_str()),
+										TEXT(resourceName.toLatin1()),
 										MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
 										(LPVOID)newBuffer, NewFileSize);
 	if(!result)
@@ -616,20 +616,20 @@ bool addResourceBITMAP(QString executablePath, QString resourceName, QString res
 // ----------------------------------------------------------------------------------
 bool updateResourceICO(QString executablePath, QString resourceName, QString resourcePath)
 {
-	char* resPath = (char*) malloc(strlen(resourcePath.toStdString().c_str()) * sizeof(char));
-	strcpy(resPath, resourcePath.toStdString().c_str());
+	char* resPath = (char*) malloc(strlen(resourcePath.toLatin1()) * sizeof(char));
+	strcpy(resPath, resourcePath.toLatin1());
 	// read ico file
 	icons::LPICONDIR iconDir;
 	iconDir = new icons::ICONDIR;
 	icons::LPICONIMAGE* iconsImage = icons::ExtractIcoFromFile(resPath, iconDir);
 
 	// Resource name
-	char* resName = (char*) malloc(strlen(resourceName.toStdString().c_str()) * sizeof(char));
-	strcpy(resName, resourceName.toStdString().c_str());
+	char* resName = (char*) malloc(strlen(resourceName.toLatin1()) * sizeof(char));
+	strcpy(resName, resourceName.toLatin1());
 
 	// Write in the new resources
-	char* exePath = (char*) malloc(strlen(executablePath.toStdString().c_str()) * sizeof(char));
-	strcpy(exePath, executablePath.toStdString().c_str());
+	char* exePath = (char*) malloc(strlen(executablePath.toLatin1()) * sizeof(char));
+	strcpy(exePath, executablePath.toLatin1());
 	// Start Update
 	bool result = ReplaceIconResource(exePath,
 											TEXT(resName),
