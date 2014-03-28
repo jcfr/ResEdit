@@ -71,11 +71,7 @@ QT4_WRAP_CPP(ResEditQt_SRCS ${ResEdit_MOC_SRCS})
 # --------------------------------------------------------------------------
 # Testing
 #
-option(BUILD_TESTING "Test the project" ON)
-if(BUILD_TESTING)
-  enable_testing()
-  include(CTest)
-endif()
+include(CTest)
 
 #-----------------------------------------------------------------------------
 # Coverage
