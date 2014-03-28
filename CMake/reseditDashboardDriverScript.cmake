@@ -87,9 +87,9 @@ else()
   message(FATAL_ERROR "Unknown script mode: '${SCRIPT_MODE}'. Script mode should be either 'experimental', 'continuous' or 'nightly'")
 endif()
 set(track ${model})
-if(WITH_PACKAGES)
-  set(track "${track}-Packages")
-endif()
+#if(WITH_PACKAGES)
+#  set(track "${track}-Packages")
+#endif()
 set(track ${CTEST_TRACK_PREFIX}${track}${CTEST_TRACK_SUFFIX})
 
 # For more details, see http://www.kitware.com/blog/home/post/11
