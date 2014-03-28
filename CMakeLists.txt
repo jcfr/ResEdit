@@ -90,24 +90,16 @@ if(WITH_COVERAGE)
 endif()
 
 #-----------------------------------------------------------------------------
-# Additional CXX/C Flags
+# ResEdit required C/CXX Flags
 #
-set(ADDITIONAL_C_FLAGS "" CACHE STRING "Additional C Flags")
-mark_as_advanced(ADDITIONAL_C_FLAGS)
-set(ADDITIONAL_CXX_FLAGS "" CACHE STRING "Additional CXX Flags")
-mark_as_advanced(ADDITIONAL_CXX_FLAGS)
-
-#-----------------------------------------------------------------------------
-# ResEdit C/CXX Flags
-#
-set(ResEdit_C_FLAGS "${CMAKE_C_FLAGS_INIT} ${COVERAGE_C_FLAGS} ${ADDITIONAL_C_FLAGS}")
-set(ResEdit_CXX_FLAGS "${CMAKE_CXX_FLAGS_INIT} ${COVERAGE_CXX_FLAGS} ${ADDITIONAL_CXX_FLAGS}")
+set(ResEdit_REQUIRED_C_FLAGS "${COVERAGE_C_FLAGS}")
+set(ResEdit_REQUIRED_CXX_FLAGS "${COVERAGE_CXX_FLAGS}")
 
 #-----------------------------------------------------------------------------
 # Set C/CXX Flags
 #
-set(CMAKE_CXX_FLAGS ${ResEdit_CXX_FLAGS} CACHE STRING "CMake C Flags" FORCE)
-set(CMAKE_C_FLAGS ${ResEdit_C_FLAGS} CACHE STRING "CMake CXX Flags" FORCE)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ResEdit_REQUIRED_CXX_FLAGS}")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${ResEdit_C_REQUIRED_FLAGS}")
 
 #-----------------------------------------------------------------------------
 # Remove warning for not using the _s
