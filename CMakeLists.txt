@@ -53,7 +53,7 @@ set(CTK_INSTALL_LIB_DIR "lib")
 
 #-----------------------------------------------------------------------------
 #
-FIND_PACKAGE(Qt4 4.7 REQUIRED)
+find_package(Qt4 4.7 REQUIRED)
 include(${QT_USE_FILE})
 
 set(ResEdit_SRCS
@@ -71,11 +71,11 @@ QT4_WRAP_CPP(ResEditQt_SRCS ${ResEdit_MOC_SRCS})
 # --------------------------------------------------------------------------
 # Testing
 #
-OPTION(BUILD_TESTING "Test the project" ON)
-IF(BUILD_TESTING)
-  ENABLE_TESTING()
+option(BUILD_TESTING "Test the project" ON)
+if(BUILD_TESTING)
+  enable_testing()
   include(CTest)
-ENDIF()
+endif()
 
 #-----------------------------------------------------------------------------
 # Coverage
@@ -134,9 +134,9 @@ include_directories(${include_dirs})
 # Build executable
 #
 
-ADD_EXECUTABLE(${PROJECT_NAME} ${ResEdit_SRCS} ${ResEditQt_SRCS})
+add_executable(${PROJECT_NAME} ${ResEdit_SRCS} ${ResEditQt_SRCS})
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${QT_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES})
 
 # Install rules
 install(TARGETS ${PROJECT_NAME}
@@ -147,9 +147,9 @@ install(TARGETS ${PROJECT_NAME}
 # --------------------------------------------------------------------------
 # Build Test
 #
-IF(BUILD_TESTING)
-  ADD_SUBDIRECTORY(Testing)
-ENDIF()
+if(BUILD_TESTING)
+  add_subdirectory(Testing)
+endif()
 
 # --------------------------------------------------------------------------
 # Configure launcher

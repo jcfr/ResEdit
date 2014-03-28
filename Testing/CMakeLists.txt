@@ -26,8 +26,8 @@ set(App4Test_Resources
 
 # --------------------------------------------------------------------------
 # Create app for test
-ADD_EXECUTABLE(${PROJECT_NAME} ${SRCS} ${App4Test_Resources})
-ADD_EXECUTABLE(${PROJECT_NAME}_Without_Resource ${SRCS})
+add_executable(${PROJECT_NAME} ${SRCS} ${App4Test_Resources})
+add_executable(${PROJECT_NAME}_Without_Resource ${SRCS})
 
 # --------------------------------------------------------------------------
 # Helper macro
