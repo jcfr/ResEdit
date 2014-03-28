@@ -6,11 +6,10 @@
 #-----------------------------------------------------------------------------
 # The following variable are expected to be define in the top-level script:
 set(expected_variables
-  ADDITIONNAL_CMAKECACHE_OPTION
+  ADDITIONAL_CMAKECACHE_OPTION
   CTEST_NOTES_FILES
   CTEST_SITE
   CTEST_DASHBOARD_ROOT
-  CTEST_CMAKE_COMMAND
   CTEST_CMAKE_GENERATOR
   WITH_MEMCHECK
   WITH_COVERAGE
@@ -33,6 +32,16 @@ if(WITH_DOCUMENTATION)
   list(APPEND expected_variables DOCUMENTATION_ARCHIVES_OUTPUT_DIRECTORY)
 endif()
 
+if(NOT DEFINED MIDAS_PACKAGES_URL)
+  set(MIDAS_PACKAGES_URL "http://packages.kitware.com")
+endif()
+if(NOT DEFINED MIDAS_PACKAGES_FOLDER_ID)
+  set(MIDAS_PACKAGES_FOLDER_ID 271)
+endif()
+if(NOT DEFINED MIDAS_PACKAGES_APPLICATION_ID)
+  set(MIDAS_PACKAGES_APPLICATION_ID 21)
+endif()
+
 foreach(var ${expected_variables})
   if(NOT DEFINED ${var})
     message(FATAL_ERROR "Variable ${var} should be defined in top-level script !")
@@ -41,8 +50,15 @@ endforeach()
 
 # If the dashscript doesn't define a GIT_REPOSITORY variable, let's define it here.
 if (NOT DEFINED GIT_REPOSITORY OR GIT_REPOSITORY STREQUAL "")
-  set(GIT_REPOSITORY git://github.com/benjaminlong/ResEdit.git)
+  set(GIT_REPOSITORY git://github.com/jcfr/ResEdit.git)
 endif()
+
+set(git_branch_option "")
+if(NOT "${GIT_TAG}" STREQUAL "")
+  set(git_branch_option "-b ${GIT_TAG}")
+endif()
+message("GIT_REPOSITORY ......: ${GIT_REPOSITORY}")
+message("GIT_TAG .............: ${GIT_TAG}")
 
 # Should binary directory be cleaned?
 set(empty_binary_directory FALSE)
@@ -50,29 +66,26 @@ set(empty_binary_directory FALSE)
 # Attempt to build and test also if 'ctest_update' returned an error
 set(force_build FALSE)
 
-# Set model options
+# Ensure SCRIPT_MODE is lowercase
+string(TOLOWER ${SCRIPT_MODE} SCRIPT_MODE)
+
+# Set model and track options
 set(model "")
-if (SCRIPT_MODE STREQUAL "experimental")
+if(SCRIPT_MODE STREQUAL "experimental")
   set(empty_binary_directory FALSE)
   set(force_build TRUE)
   set(model Experimental)
-elseif (SCRIPT_MODE STREQUAL "continuous")
+elseif(SCRIPT_MODE STREQUAL "continuous")
   set(empty_binary_directory TRUE)
   set(force_build FALSE)
   set(model Continuous)
-elseif (SCRIPT_MODE STREQUAL "nightly")
+elseif(SCRIPT_MODE STREQUAL "nightly")
   set(empty_binary_directory TRUE)
   set(force_build TRUE)
   set(model Nightly)
 else()
   message(FATAL_ERROR "Unknown script mode: '${SCRIPT_MODE}'. Script mode should be either 'experimental', 'continuous' or 'nightly'")
 endif()
-
-#message("script_mode:${SCRIPT_MODE}")
-#message("model:${model}")
-#message("empty_binary_directory:${empty_binary_directory}")
-#message("force_build:${force_build}")
-
 set(track ${model})
 if(WITH_PACKAGES)
   set(track "${track}-Packages")
@@ -80,10 +93,11 @@ endif()
 set(track ${CTEST_TRACK_PREFIX}${track}${CTEST_TRACK_SUFFIX})
 
 # For more details, see http://www.kitware.com/blog/home/post/11
-set(CTEST_USE_LAUNCHERS 0)
-#if (NOT ${CTEST_CMAKE_GENERATOR} MATCHES "Visual Studio")
-#  set(CTEST_USE_LAUNCHERS 1)
-#endif()
+set(CTEST_USE_LAUNCHERS 1)
+if(NOT "${CTEST_CMAKE_GENERATOR}" MATCHES "Make")
+  set(CTEST_USE_LAUNCHERS 0)
+endif()
+set(ENV{CTEST_USE_LAUNCHERS_DEFAULT} ${CTEST_USE_LAUNCHERS})
 
 if(empty_binary_directory)
   message("Directory ${CTEST_BINARY_DIRECTORY} cleaned !")
@@ -91,11 +105,33 @@ if(empty_binary_directory)
 endif()
 
 if(NOT EXISTS "${CTEST_SOURCE_DIRECTORY}")
-  set(CTEST_CHECKOUT_COMMAND "${CTEST_GIT_COMMAND} clone ${GIT_REPOSITORY} ${CTEST_SOURCE_DIRECTORY}")
+  set(CTEST_CHECKOUT_COMMAND "${CTEST_GIT_COMMAND} clone ${git_branch_option} ${GIT_REPOSITORY} ${CTEST_SOURCE_DIRECTORY}")
 endif()
-
 set(CTEST_UPDATE_COMMAND "${CTEST_GIT_COMMAND}")
+
 set(CTEST_SOURCE_DIRECTORY "${CTEST_SOURCE_DIRECTORY}")
+
+#-----------------------------------------------------------------------------
+# Macro allowing to set a variable to its default value only if not already defined
+macro(setOnlyIfNotDefined var defaultvalue)
+  if(NOT DEFINED ${var})
+    set(${var} "${defaultvalue}")
+  endif()
+endmacro()
+
+#-----------------------------------------------------------------------------
+# The following variable can be used while testing the driver scripts
+#-----------------------------------------------------------------------------
+setOnlyIfNotDefined(run_ctest_submit TRUE)
+setOnlyIfNotDefined(run_ctest_with_update TRUE)
+setOnlyIfNotDefined(run_ctest_with_configure TRUE)
+setOnlyIfNotDefined(run_ctest_with_build TRUE)
+setOnlyIfNotDefined(run_ctest_with_test TRUE)
+setOnlyIfNotDefined(run_ctest_with_coverage TRUE)
+setOnlyIfNotDefined(run_ctest_with_memcheck TRUE)
+setOnlyIfNotDefined(run_ctest_with_packages TRUE)
+setOnlyIfNotDefined(run_ctest_with_upload TRUE)
+setOnlyIfNotDefined(run_ctest_with_notes TRUE)
 
 #
 # run_ctest macro
@@ -121,8 +157,6 @@ macro(run_ctest)
     QT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}
     GIT_EXECUTABLE:FILEPATH=${CTEST_GIT_COMMAND}
     WITH_COVERAGE:BOOL=${WITH_COVERAGE}
-    DOCUMENTATION_TARGET_IN_ALL:BOOL=${WITH_DOCUMENTATION}
-    DOCUMENTATION_ARCHIVES_OUTPUT_DIRECTORY:PATH=${DOCUMENTATION_ARCHIVES_OUTPUT_DIRECTORY}
     ${ADDITIONAL_CMAKECACHE_OPTION}
     ")
   endif()
@@ -130,19 +164,6 @@ macro(run_ctest)
   if(FILES_UPDATED GREATER 0 OR force_build)
 
     set(force_build 0)
-
-    #-----------------------------------------------------------------------------
-    # The following variable can be used while testing the driver scripts
-    #-----------------------------------------------------------------------------
-    set(run_ctest_submit TRUE)
-    set(run_ctest_with_update TRUE)
-    set(run_ctest_with_configure TRUE)
-    set(run_ctest_with_build TRUE)
-    set(run_ctest_with_test TRUE)
-    set(run_ctest_with_coverage TRUE)
-    set(run_ctest_with_memcheck TRUE)
-    set(run_ctest_with_packages TRUE)
-    set(run_ctest_with_notes TRUE)
 
     #-----------------------------------------------------------------------------
     # Update
@@ -229,7 +250,114 @@ macro(run_ctest)
           ctest_submit(PARTS MemCheck)
         endif()
     endif()
-    
+
+    #-----------------------------------------------------------------------------
+    # Create packages / installers ...
+    #-----------------------------------------------------------------------------
+    if(WITH_PACKAGES AND (run_ctest_with_packages OR run_ctest_with_upload))
+      message("----------- [ WITH_PACKAGES and UPLOAD ] -----------")
+
+      if("$ENV{MIDAS_PACKAGES_API_EMAIL}" STREQUAL "")
+        message(FATAL_ERROR "Failed to upload package - MIDAS_PACKAGES_API_EMAIL environment variable not set !")
+      endif()
+      if("$ENV{MIDAS_PACKAGES_API_KEY}" STREQUAL "")
+        message(FATAL_ERROR "Failed to upload package - MIDAS_PACKAGES_API_KEY environment variable not set !")
+      endif()
+
+      if(build_errors GREATER "0")
+        message("Build Errors Detected: ${build_errors}. Aborting package generation")
+      else()
+
+        # Update CMake module path so that our custom macros/functions can be included.
+        set(CMAKE_MODULE_PATH ${CTEST_SOURCE_DIRECTORY}/CMake ${CMAKE_MODULE_PATH})
+
+        # Download and include CTestPackage
+        set(url http://viewvc.slicer.org/viewvc.cgi/Slicer4/trunk/CMake/CTestPackage.cmake?revision=19739&view=co)
+        set(dest ${CTEST_BINARY_DIRECTORY}/CTestPackage.cmake)
+        download_file(${url} ${dest})
+        include(${dest})
+
+        # Download and include MIDASCTestUploadURL
+        set(url http://viewvc.slicer.org/viewvc.cgi/Slicer4/trunk/CMake/MIDASCTestUploadURL.cmake?revision=19739&view=co)
+        set(dest ${CTEST_BINARY_DIRECTORY}/MIDASCTestUploadURL.cmake)
+        download_file(${url} ${dest})
+        include(${dest})
+
+        # Download and include MidasAPI
+        set(url ${MIDAS_PACKAGES_URL}/api/rest?method=midas.packages.script.download)
+        set(dest ${CMAKE_CURRENT_LIST_DIR}/MidasAPI.cmake)
+        download_file(${url} ${dest})
+        include(${dest})
+
+        set(packages)
+        if(run_ctest_with_packages)
+          message("Packaging ...")
+          ctest_package(
+            BINARY_DIR ${CTEST_BINARY_DIRECTORY}
+            CONFIG ${CTEST_BUILD_CONFIGURATION}
+            RETURN_VAR packages)
+        else()
+          set(packages ${CMAKE_CURRENT_LIST_FILE})
+        endif()
+
+        if(WIN32)
+          set(PACKAGE_OS "Windows")
+        elseif(APPLE)
+          set(PACKAGE_OS "MacOSX")
+        elseif(UNIX)
+          set(PACKAGE_OS "Linux")
+        endif()
+
+        set(PACKAGE_BITNESS "${MY_BITNESS}-bit")
+
+        if(run_ctest_with_upload)
+          message("Uploading ...")
+          foreach(p ${packages})
+            get_filename_component(PACKAGE_NAME "${p}" NAME)
+
+            set(_version_regex "0.[0-9].[0-9][0-9]?")
+            set(_os_regex "-(win|linux|macosx|Darwin|Windows|Linux)")
+            string(REGEX MATCH ${_version_regex} PACKAGE_VERSION ${PACKAGE_NAME})
+            set(PACKAGE_RELEASE "")
+            if(PACKAGE_NAME MATCHES ${_version_regex}${_os_regex})
+              set(PACKAGE_RELEASE ${PACKAGE_VERSION})
+            endif()
+
+            message("Uploading [${PACKAGE_NAME}] on [${MIDAS_PACKAGES_URL}]")
+            midas_api_package_upload(
+              API_URL ${MIDAS_PACKAGES_URL}
+              API_EMAIL $ENV{MIDAS_PACKAGES_API_EMAIL}
+              API_KEY $ENV{MIDAS_PACKAGES_API_KEY}
+              FILE ${p}
+              NAME ${PACKAGE_NAME}
+              FOLDER_ID ${MIDAS_PACKAGES_FOLDER_ID}
+              APPLICATION_ID ${MIDAS_PACKAGES_APPLICATION_ID}
+              OS ${PACKAGE_OS}
+              ARCH ${PACKAGE_BITNESS}
+              PACKAGE_TYPE "TGZ Archive"
+              SUBMISSION_TYPE ${model}
+              RELEASE ${PACKAGE_RELEASE}
+              RESULT_VARNAME midas_upload_status
+              )
+            if(midas_upload_status STREQUAL "ok")
+              message("Uploading URL on CDash")
+              set(MIDAS_PACKAGE_URL ${MIDAS_PACKAGES_URL})
+              midas_ctest_upload_url(${p}) # on success, upload a link to CDash
+            endif()
+            if(NOT midas_upload_status STREQUAL "ok")
+              message("        => Failed to upload item package ! See [${CMAKE_CURRENT_BINARY_DIR}/midas.*_response.txt] for more details.\n")
+              message("Uploading [${PACKAGE_NAME}] on CDash")
+              ctest_upload(FILES ${p})
+            endif()
+            if(run_ctest_submit)
+              ctest_submit(PARTS Upload)
+            endif()
+          endforeach()
+        endif()
+
+      endif()
+    endif()
+
     #-----------------------------------------------------------------------------
     # Note should be at the end
     #-----------------------------------------------------------------------------
@@ -241,12 +369,13 @@ macro(run_ctest)
 endmacro()
 
 if(SCRIPT_MODE STREQUAL "continuous")
-  while(${CTEST_ELAPSED_TIME} LESS 68400)
+  while(${CTEST_ELAPSED_TIME} LESS 46800) # Lasts 13 hours (Assuming it starts at 9am, it will end around 10pm)
     set(START_TIME ${CTEST_ELAPSED_TIME})
     run_ctest()
-    # Loop no faster than once every 5 minutes
-    message("Wait for 5 minutes ...")
-    ctest_sleep(${START_TIME} 300 ${CTEST_ELAPSED_TIME})
+    set(interval 300)
+    # Loop no faster than once every <interval> seconds
+    message("Wait for ${interval} seconds ...")
+    ctest_sleep(${START_TIME} ${interval} ${CTEST_ELAPSED_TIME})
   endwhile()
 else()
   run_ctest()

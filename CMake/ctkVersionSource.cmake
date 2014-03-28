@@ -1,7 +1,7 @@
 # Adapted from: CMake/Utilites/CMakeVersionSource.cmake
 
 # Try to identify the current development source version.
-set(CTKAppLauncher_VERSION_SOURCE "")
+set(CTKResEdit_VERSION_SOURCE "")
 if(NOT EXISTS ${CMAKE_SOURCE_DIR}/.git/HEAD)
   message(FATAL_ERROR "error: ${CMAKE_SOURCE_DIR} is NOT a git repository. ")
 endif()
@@ -15,7 +15,7 @@ if(GIT_EXECUTABLE)
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     )
   if(head)
-    set(CTKAppLauncher_VERSION_SOURCE "g${head}")
+    set(CTKResEdit_VERSION_SOURCE "g${head}")
     execute_process(
       COMMAND ${GIT_EXECUTABLE} update-index -q --refresh
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
@@ -27,7 +27,7 @@ if(GIT_EXECUTABLE)
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
       )
     if(dirty)
-      set(CTKAppLauncher_VERSION_SOURCE "${CTKAppLauncher_VERSION_SOURCE}-dirty")
+      set(CTKResEdit_VERSION_SOURCE "${CTKResEdit_VERSION_SOURCE}-dirty")
     endif()
   endif()
 endif()
