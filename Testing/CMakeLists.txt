@@ -1,7 +1,5 @@
-cmake_minimum_required(VERSION 2.8.2)
 
 # --------------------------------------------------------------------------
-# Launcher information
 set(RESEDIT_NAME ${PROJECT_NAME})
 set(RESEDIT_VERSION ${CTKResEdit_VERSION})
 set(RESEDIT_BINARY_DIR ${CTKResEdit_BINARY_DIR})
@@ -32,7 +30,7 @@ add_executable(${PROJECT_NAME}_Without_Resource ${SRCS})
 # --------------------------------------------------------------------------
 # Helper macro
 macro(resedit_add_test testname)
-  add_test(${testname} ${CMAKE_COMMAND}
+  add_test(NAME ${testname} COMMAND ${CTKResEdit_LAUNCH_COMMAND} ${CMAKE_COMMAND}
     -DTEST_SOURCE_DIR:PATH=${CMAKE_CURRENT_SOURCE_DIR}
     -DTEST_BINARY_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}
     -P ${CMAKE_CURRENT_SOURCE_DIR}/${testname}.cmake

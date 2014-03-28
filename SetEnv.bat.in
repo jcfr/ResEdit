@@ -1,3 +1,12 @@
 @ECHO OFF
 set PATH=@QT_SHARED_LIBRARY_PATH_CONFIG@;%PATH%
 
+%*
+IF %ERRORLEVEL% NEQ 0 (
+  EXIT 1
+) ELSE (
+  EXIT 0
+)
+
+:: Exit and pass along our exit code.
+

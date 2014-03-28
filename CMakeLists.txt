@@ -133,13 +133,6 @@ install(TARGETS ${PROJECT_NAME}
   ARCHIVE DESTINATION ${CTK_INSTALL_LIB_DIR} COMPONENT Development)
 
 # --------------------------------------------------------------------------
-# Build Test
-#
-if(BUILD_TESTING)
-  add_subdirectory(Testing)
-endif()
-
-# --------------------------------------------------------------------------
 # Configure launcher
 #
 get_filename_component(QT_SHARED_LIBRARY_PATH_CONFIG ${QT_QMAKE_EXECUTABLE} PATH)
@@ -147,6 +140,14 @@ configure_file(
   SetEnv.bat.in
   ${CMAKE_BINARY_DIR}/SetEnv.bat
   )
+set(CTKResEdit_LAUNCH_COMMAND ${CMAKE_BINARY_DIR}/SetEnv.bat)
+
+# --------------------------------------------------------------------------
+# Build Test
+#
+if(BUILD_TESTING)
+  add_subdirectory(Testing)
+endif()
 
 #-----------------------------------------------------------------------------
 # Build a CPack installer if CPack is available and this is a build of just
