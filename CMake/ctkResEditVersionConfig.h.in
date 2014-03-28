@@ -1,0 +1,12 @@
+
+
+#ifndef __ctkResEditVersionConfigure_h
+#define __ctkResEditVersionConfigure_h
+
+#define CTKResEdit_MAJOR_VERSION @CTKResEdit_MAJOR_VERSION@
+#define CTKResEdit_MINOR_VERSION @CTKResEdit_MINOR_VERSION@
+#define CTKResEdit_BUILD_VERSION @CTKResEdit_BUILD_VERSION@
+#define CTKResEdit_VERSION "@CTKResEdit_VERSION@"
+
+#endif
+

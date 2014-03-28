@@ -14,6 +14,7 @@
 
 // ResEdit includes
 #include "ctkCommandLineParser.h"
+#include "ctkResEditVersionConfig.h"
 
 // Store all the resources
 //QHash<QString, QString> Resources;
@@ -331,6 +332,8 @@ int main(int argc, char* argv[])
 	commandLine.setArgumentPrefix("--", "-");
 
 	commandLine.beginGroup(QString("Option"));
+	commandLine.addArgument("version","v", QVariant::Bool,
+	  "Show application version information");
 	commandLine.addArgument("help", "h", QVariant::Bool,
 		"Display available command line arguments.");
 	commandLine.addArgument("list-resources", "l", QVariant::String,
@@ -351,7 +354,12 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 		}
 
-	if(parsedArgs.contains("help") || parsedArgs.contains("h"))
+  if (parsedArgs.value("version").toBool())
+    {
+    QTextStream(stdout, QIODevice::WriteOnly) << "CTKResEdit version "CTKResEdit_VERSION << "\n";
+    return EXIT_SUCCESS;
+    }
+	else if (parsedArgs.contains("help") || parsedArgs.contains("h"))
 		{
 		QTextStream(stdout, QIODevice::WriteOnly) << commandLine.helpText() << "\n";
 		return EXIT_SUCCESS;

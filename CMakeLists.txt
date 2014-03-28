@@ -15,6 +15,43 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 #-----------------------------------------------------------------------------
+# Version number.
+#
+set(CTKResEdit_MAJOR_VERSION 0)
+set(CTKResEdit_MINOR_VERSION 1)
+set(CTKResEdit_BUILD_VERSION 0)
+set(CTKResEdit_VERSION_IS_RELEASE 0)
+#set(CTKResEdit_VERSION_RC 1)
+
+if(CTKResEdit_VERSION_IS_RELEASE)
+  set(CTKResEdit_VERSION_SOURCE "")
+else()
+  include(${CMAKE_SOURCE_DIR}/CMake/ctkVersionSource.cmake)
+endif()
+
+# Compute the full version string.
+set(CTKResEdit_VERSION
+    "${CTKResEdit_MAJOR_VERSION}.${CTKResEdit_MINOR_VERSION}.${CTKResEdit_BUILD_VERSION}")
+if(CTKResEdit_VERSION_RC)
+  set(CTKResEdit_VERSION ${CTKResEdit_VERSION}-rc${CTKResEdit_VERSION_RC})
+endif()
+if(CTKResEdit_VERSION_SOURCE)
+  set(CTKResEdit_VERSION ${CTKResEdit_VERSION}-${CTKResEdit_VERSION_SOURCE})
+endif()
+message(STATUS "CTKResEdit version: ${CTKResEdit_VERSION}")
+
+configure_file(
+  CMake/ctkResEditVersionConfig.h.in
+  ${CMAKE_CURRENT_BINARY_DIR}/ctkResEditVersionConfig.h
+  )
+
+#-----------------------------------------------------------------------------
+# Install directories, used for install rules.
+#
+set(CTK_INSTALL_BIN_DIR "bin")
+set(CTK_INSTALL_LIB_DIR "lib")
+
+#-----------------------------------------------------------------------------
 #
 FIND_PACKAGE(Qt4 4.7 REQUIRED)
 include(${QT_USE_FILE})
@@ -101,6 +138,12 @@ ADD_EXECUTABLE(${PROJECT_NAME} ${ResEdit_SRCS} ${ResEditQt_SRCS})
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${QT_LIBRARIES})
 
+# Install rules
+install(TARGETS ${PROJECT_NAME}
+  RUNTIME DESTINATION ${CTK_INSTALL_BIN_DIR} COMPONENT Runtime
+  LIBRARY DESTINATION ${CTK_INSTALL_LIB_DIR} COMPONENT Runtime
+  ARCHIVE DESTINATION ${CTK_INSTALL_LIB_DIR} COMPONENT Development)
+
 # --------------------------------------------------------------------------
 # Build Test
 #
@@ -116,3 +159,28 @@ configure_file(
   SetEnv.bat.in
   ${CMAKE_BINARY_DIR}/SetEnv.bat
   )
+
+#-----------------------------------------------------------------------------
+# Build a CPack installer if CPack is available and this is a build of just
+# CTKResEdit (as opposed to a build of CTKResEdit included in some other project...)
+
+if("${CTKResEdit_BINARY_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
+
+  if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    set(CPACK_SYSTEM_NAME "win-i386")
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+      set(CPACK_SYSTEM_NAME "win-amd64")
+    endif()
+  endif()
+
+  set(CPACK_MONOLITHIC_INSTALL ON)
+  set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PROJECT_NAME} - The Common Toolkit Application Launcher")
+  set(CPACK_PACKAGE_VENDOR "Kitware, Inc.")
+  #set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/Copyright.txt")
+  #set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/Copyright.txt")
+  set(CPACK_PACKAGE_VERSION "${CTKResEdit_VERSION}")
+  set(CPACK_PACKAGE_INSTALL_DIRECTORY "${PROJECT_NAME} ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}")
+  set(CPACK_PACKAGE_EXECUTABLES "${PROJECT_NAME}")
+  set(CPACK_GENERATOR "TGZ")
+  include(CPack)
+endif()
