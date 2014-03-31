@@ -373,7 +373,7 @@ int main(int argc, char* argv[])
 		// Load the .EXE file that contains the dialog box you want to copy.
     exePath = (char*) malloc(parsedArgs.value("list-resources").toString().size() + 1);
     strcpy(exePath, parsedArgs.value("list-resources").toString().toLatin1().constData());
-    hExe = loadLibraryEx(TEXT(exePath), NULL, LOAD_LIBRARY_AS_IMAGE_RESOURCE);
+    hExe = loadLibraryEx(TEXT(exePath), NULL, LOAD_LIBRARY_AS_IMAGE_RESOURCE|LOAD_LIBRARY_AS_DATAFILE);
     if (!hExe)
       {
       return EXIT_FAILURE;
@@ -402,7 +402,7 @@ int main(int argc, char* argv[])
 		QStringList arguments = parsedArgs.value("delete-resource").toStringList();
     exePath = (char*) malloc(arguments.at(0).size() + 1);
     strcpy(exePath, arguments.at(0).toLatin1().constData());
-    hExe = loadLibraryEx(TEXT(exePath), NULL, LOAD_LIBRARY_AS_IMAGE_RESOURCE);
+    hExe = loadLibraryEx(TEXT(exePath), NULL, LOAD_LIBRARY_AS_IMAGE_RESOURCE|LOAD_LIBRARY_AS_DATAFILE);
     if (!hExe)
       {
       return EXIT_FAILURE;
