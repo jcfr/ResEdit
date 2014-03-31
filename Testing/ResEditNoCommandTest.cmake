@@ -1,5 +1,5 @@
 
-include(${CMAKE_SOURCE_DIR}/ResEditTestPrerequisites.cmake)
+include(${TEST_BINARY_DIR}/ResEditTestPrerequisites.cmake)
 
 # --------------------------------------------------------------------------------
 # Test without argument - Expect to faile - Command full name

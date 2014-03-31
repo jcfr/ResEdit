@@ -100,7 +100,7 @@ namespace icons
 
 		if( (hFile1 = CreateFileA( filename, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL )) == INVALID_HANDLE_VALUE )
 			{
-			QTextStream(stdout, QIODevice::WriteOnly) << "Error Opening File for Reading" << filename << "\n";
+			QTextStream(stderr, QIODevice::WriteOnly) << "Error Opening File for Reading" << filename << "\n";
 			return NULL;
 			}
 		ReadFile( hFile1, &(pIconDir->idReserved), sizeof( WORD ), &dwBytesRead, NULL );
@@ -255,7 +255,7 @@ namespace icons
 		hUpdate = BeginUpdateResourceA(lpFileName, FALSE); //false sa nu stearga resursele neupdated
 		if(hUpdate==NULL)
 			{
-			QTextStream(stdout, QIODevice::WriteOnly) << "erreur BeginUpdateResource " << lpFileName << "\n";
+			QTextStream(stderr, QIODevice::WriteOnly) << "error BeginUpdateResource " << lpFileName << "\n";
 			res=false;
 			}
 		//aici e cu lang NEUTRAL
@@ -268,18 +268,18 @@ namespace icons
 			{
 			res=UpdateResource(hUpdate,RT_ICON,MAKEINTRESOURCE(lpGrpIconDir->idEntries[i].nID),langId,pIconImage[i],lpGrpIconDir->idEntries[i].dwBytesInRes);
 			if(res==false)
-				QTextStream(stdout, QIODevice::WriteOnly) << "erreur UpdateResource RT_ICON " << lpFileName << "\n";
+				QTextStream(stderr, QIODevice::WriteOnly) << "error UpdateResource RT_ICON " << lpFileName << "\n";
 			}
 
 		for(i=lpGrpIconDir->idCount;i<lpInitGrpIconDir->idCount;++i)
 			{
 			res=UpdateResource(hUpdate,RT_ICON,MAKEINTRESOURCE(lpInitGrpIconDir->idEntries[i].nID),langId,NULL,0);
 			if(res==false)
-				QTextStream(stdout, QIODevice::WriteOnly) << "erreur to delete resource " << lpFileName << "\n";	
+        QTextStream(stderr, QIODevice::WriteOnly) << "error deleting resource " << lpFileName << "\n";
 			}
 
 		if(!EndUpdateResource(hUpdate,FALSE)) //false ->resource updates will take effect.
-			QTextStream(stdout, QIODevice::WriteOnly) << "eroare EndUpdateResource" << lpFileName << "\n";
+			QTextStream(stderr, QIODevice::WriteOnly) << "error EndUpdateResource" << lpFileName << "\n";
 
 		//	FreeResource(hGlobal);
 		delete[] lpGrpIconDir->idEntries;
@@ -350,7 +350,7 @@ int main(int argc, char* argv[])
 	QHash<QString, QVariant> parsedArgs = commandLine.parseArguments(argc, argv, &ok);
 	if (!ok)
 		{
-		QTextStream(stdout, QIODevice::WriteOnly) << "Error parsing arguments : " << commandLine.errorString() << "\n";
+		QTextStream(stderr, QIODevice::WriteOnly) << "Error parsing arguments : " << commandLine.errorString() << "\n";
 		return EXIT_FAILURE;
 		}
 
@@ -365,16 +365,19 @@ int main(int argc, char* argv[])
 		return EXIT_SUCCESS;
 		}
 
-	char* exePath;
+  char* exePath;
 	HMODULE hExe;       // handle to existing .EXE file
 
 	if(parsedArgs.contains("list-resources") || parsedArgs.contains("l"))
-		{
+    {
 		// Load the .EXE file that contains the dialog box you want to copy.
-		exePath =
-			(char*) malloc(strlen(parsedArgs.value("list-resources").toString().toLatin1()) * sizeof(char));
-		strcpy(exePath, parsedArgs.value("list-resources").toString().toLatin1());
-		hExe = loadLibraryEx(TEXT(exePath), NULL, LOAD_LIBRARY_AS_IMAGE_RESOURCE);
+    exePath = (char*) malloc(parsedArgs.value("list-resources").toString().size() + 1);
+    strcpy(exePath, parsedArgs.value("list-resources").toString().toLatin1().constData());
+    hExe = loadLibraryEx(TEXT(exePath), NULL, LOAD_LIBRARY_AS_IMAGE_RESOURCE);
+    if (!hExe)
+      {
+      return EXIT_FAILURE;
+      }
 
 		// List all resources
 		EnumResourceTypes(hExe, (ENUMRESTYPEPROC)EnumTypesFunc, 0);
@@ -389,7 +392,7 @@ int main(int argc, char* argv[])
 		// Clean up.
 		if (!FreeLibrary(hExe))
 			{
-			QTextStream(stdout, QIODevice::WriteOnly) << "Could not free executable : " << exePath << "\n";
+			QTextStream(stderr, QIODevice::WriteOnly) << "Could not free executable : " << exePath << "\n";
 			return EXIT_FAILURE;
 			}
 		}
@@ -397,9 +400,13 @@ int main(int argc, char* argv[])
 	else if(parsedArgs.contains("delete-resource"))
 		{
 		QStringList arguments = parsedArgs.value("delete-resource").toStringList();
-		exePath = (char*) malloc(strlen(arguments.at(0).toLatin1()) * sizeof(char));
-		strcpy(exePath, arguments.at(0).toLatin1());
-		hExe = loadLibraryEx(TEXT(exePath), NULL, LOAD_LIBRARY_AS_IMAGE_RESOURCE);
+    exePath = (char*) malloc(arguments.at(0).size() + 1);
+    strcpy(exePath, arguments.at(0).toLatin1().constData());
+    hExe = loadLibraryEx(TEXT(exePath), NULL, LOAD_LIBRARY_AS_IMAGE_RESOURCE);
+    if (!hExe)
+      {
+      return EXIT_FAILURE;
+      }
 
 		// List all resources
 		EnumResourceTypes(hExe, (ENUMRESTYPEPROC)EnumTypesFunc, 0);
@@ -419,7 +426,7 @@ int main(int argc, char* argv[])
 		bool result = addResourceBITMAP(arguments.at(0), arguments.at(1), arguments.at(2));
 		if(!result)
 			{
-			QTextStream(stdout, QIODevice::WriteOnly) << "Resource bitmap couldn't be added.\n";
+			QTextStream(stderr, QIODevice::WriteOnly) << "Resource bitmap couldn't be added.\n";
 			return EXIT_FAILURE;
 			}
 		QTextStream(stdout, QIODevice::WriteOnly) << "Resource bitmap added.\n";
@@ -433,7 +440,7 @@ int main(int argc, char* argv[])
 		bool result = updateResourceICO(arguments.at(0), arguments.at(1), arguments.at(2));
 		if(!result)
 			{
-			QTextStream(stdout, QIODevice::WriteOnly) << "Resource ico couldn't be updated.\n";
+			QTextStream(stderr, QIODevice::WriteOnly) << "Resource ico couldn't be updated.\n";
 			return EXIT_FAILURE;
 			}
 		QTextStream(stdout, QIODevice::WriteOnly) << "Resource ico updated.\n";
@@ -493,7 +500,7 @@ HMODULE loadLibraryEx(LPCTSTR lpFileName, HANDLE hFile, DWORD dwFlags)
 	hExe = LoadLibraryEx(TEXT(lpFileName), hFile, dwFlags);
 	if (hExe == NULL)
 		{
-		QTextStream(stdout, QIODevice::WriteOnly) << "Could not load .exe " << lpFileName << "\n";
+		QTextStream(stderr, QIODevice::WriteOnly) << "Could not load .exe " << lpFileName << "\n";
 		return 0;
 		}
 	return hExe;
@@ -502,13 +509,13 @@ HMODULE loadLibraryEx(LPCTSTR lpFileName, HANDLE hFile, DWORD dwFlags)
 // ----------------------------------------------------------------------------------
 bool removeResource(QString executablePath, QString resourceType, QString resourceName)
 {
-	char* exePath = (char*) malloc(strlen(executablePath.toLatin1()) * sizeof(char));
-		strcpy(exePath, executablePath.toLatin1());
+  char* exePath = (char*) malloc(executablePath.size() + 1);
+    strcpy(exePath, executablePath.toLatin1().constData());
 	// Start Update
 	HANDLE hUpdateRes = BeginUpdateResource(TEXT(exePath), FALSE);
 	if (hUpdateRes == NULL)
 		{
-		QTextStream(stdout, QIODevice::WriteOnly) << "Could not open file for writing.\n";
+		QTextStream(stderr, QIODevice::WriteOnly) << "Could not open file for writing.\n";
 		return false;
 		}
 
@@ -518,8 +525,8 @@ bool removeResource(QString executablePath, QString resourceType, QString resour
 	bool result = false;
 	if (resourceName.toInt() == 0)
 		{
-		char* name = (char*) malloc(strlen(resourceName.toLatin1()) * sizeof(char));
-		strcpy(name, resourceName.toLatin1());
+    char* name = (char*) malloc(resourceName.size() + 1);
+    strcpy(name, resourceName.toLatin1().constData());
 		qDebug() << "not int :" << resourceName << resourceType << name;
 		result = UpdateResource(hUpdateRes, MAKEINTRESOURCE(type), name, MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US), NULL, 0);
 		}
@@ -531,14 +538,14 @@ bool removeResource(QString executablePath, QString resourceType, QString resour
 		}
 	if(!result)
 		{
-		QTextStream(stdout, QIODevice::WriteOnly) << "Resource could not be deleted \n";
+		QTextStream(stderr, QIODevice::WriteOnly) << "Resource could not be deleted \n";
 		return false;
 		}
 
 	// Write changes to .EXE and then close it.
 	if (!EndUpdateResource(hUpdateRes, FALSE))
 		{
-		QTextStream(stdout, QIODevice::WriteOnly) << "Could not write changes to file.\n";
+		QTextStream(stderr, QIODevice::WriteOnly) << "Could not write changes to file.\n";
 		return false;
 		}
 
@@ -550,8 +557,8 @@ bool addResourceBITMAP(QString executablePath, QString resourceName, QString res
 {
 	// Load file
 	// Get the bmp into memory
-	char* resPath = (char*) malloc(strlen(resourcePath.toLatin1()) * sizeof(char));
-	strcpy(resPath, resourcePath.toLatin1());
+  char* resPath = (char*) malloc(resourcePath.size() + 1);
+  strcpy(resPath, resourcePath.toLatin1().constData());
 	//HANDLE hIcon = LoadImage(NULL, TEXT(resPath), IMAGE_ICON, 0, 0, LR_LOADFROMFILE|LR_DEFAULTSIZE);
 	//LPVOID lpResLock = LockResource(hIcon);
 
@@ -559,7 +566,7 @@ bool addResourceBITMAP(QString executablePath, QString resourceName, QString res
 									  OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if(hFile == NULL)
 		{
-		QTextStream(stdout, QIODevice::WriteOnly) << "Could not load ico file.\n";
+		QTextStream(stderr, QIODevice::WriteOnly) << "Could not load ico file.\n";
 		return false;
 		}
 
@@ -577,13 +584,13 @@ bool addResourceBITMAP(QString executablePath, QString resourceName, QString res
 	DWORD NewFileSize = FileSize - sizeof(BITMAPFILEHEADER);
 
 	// Write in the new resources
-	char* exePath = (char*) malloc(strlen(executablePath.toLatin1()) * sizeof(char));
-	strcpy(exePath, executablePath.toLatin1());
+  char* exePath = (char*) malloc(executablePath.size() + 1);
+  strcpy(exePath, executablePath.toLatin1().constData());
 	// Start Update
 	HANDLE hUpdateRes = BeginUpdateResource(TEXT(exePath), FALSE);
 	if (hUpdateRes == NULL)
 		{
-    QTextStream(stdout, QIODevice::WriteOnly) << "Could not open file for writing.\n";
+    QTextStream(stderr, QIODevice::WriteOnly) << "Could not open file for writing.\n";
     return false;
 		}
 
@@ -592,18 +599,18 @@ bool addResourceBITMAP(QString executablePath, QString resourceName, QString res
 	// update resouce.
 	bool result = UpdateResource(hUpdateRes,
 										RT_ICON,
-										TEXT(resourceName.toLatin1()),
+                    TEXT(resourceName.toLatin1().constData()),
 										MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
 										(LPVOID)newBuffer, NewFileSize);
 	if(!result)
 		{
-		QTextStream(stdout, QIODevice::WriteOnly) << "Resource Could not be added.\n";
+		QTextStream(stderr, QIODevice::WriteOnly) << "Resource Could not be added.\n";
 		return false;
 		}
 
 	if(!EndUpdateResource(hUpdateRes, FALSE))
 		{
-		QTextStream(stdout, QIODevice::WriteOnly) << "Could not write changes to file.\n";
+		QTextStream(stderr, QIODevice::WriteOnly) << "Could not write changes to file.\n";
 		return false;
 		}
 
@@ -616,20 +623,20 @@ bool addResourceBITMAP(QString executablePath, QString resourceName, QString res
 // ----------------------------------------------------------------------------------
 bool updateResourceICO(QString executablePath, QString resourceName, QString resourcePath)
 {
-	char* resPath = (char*) malloc(strlen(resourcePath.toLatin1()) * sizeof(char));
-	strcpy(resPath, resourcePath.toLatin1());
+  char* resPath = (char*) malloc(resourcePath.size() + 1);
+  strcpy(resPath, resourcePath.toLatin1().constData());
 	// read ico file
 	icons::LPICONDIR iconDir;
 	iconDir = new icons::ICONDIR;
 	icons::LPICONIMAGE* iconsImage = icons::ExtractIcoFromFile(resPath, iconDir);
 
 	// Resource name
-	char* resName = (char*) malloc(strlen(resourceName.toLatin1()) * sizeof(char));
-	strcpy(resName, resourceName.toLatin1());
+  char* resName = (char*) malloc(resourceName.size() + 1);
+  strcpy(resName, resourceName.toLatin1().constData());
 
 	// Write in the new resources
-	char* exePath = (char*) malloc(strlen(executablePath.toLatin1()) * sizeof(char));
-	strcpy(exePath, executablePath.toLatin1());
+  char* exePath = (char*) malloc(executablePath.size() + 1);
+  strcpy(exePath, executablePath.toLatin1().constData());
 	// Start Update
 	bool result = ReplaceIconResource(exePath,
 											TEXT(resName),

@@ -1,5 +1,5 @@
 
-include(${CMAKE_SOURCE_DIR}/ResEditTestPrerequisites.cmake)
+include(${TEST_BINARY_DIR}/ResEditTestPrerequisites.cmake)
 
 # --------------------------------------------------------------------------------
 # First we list resources

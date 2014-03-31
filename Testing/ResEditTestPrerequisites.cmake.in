@@ -7,6 +7,12 @@ set(resedit_binary_dir "@RESEDIT_BINARY_DIR@")
 set(resedit_source_dir "@RESEDIT_SOURCE_DIR@")
 
 # --------------------------------------------------------------------------
+# Exit codes
+
+set(EXIT_SUCCESS 0)
+set(EXIT_FAILURE 1)
+
+# --------------------------------------------------------------------------
 # Recover the Build Type
 set(build_types
 	"Debug"
