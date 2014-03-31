@@ -25,9 +25,9 @@ BOOL EnumNamesFunc(HMODULE hModule, LPTSTR lpType, LPTSTR lpName, LONG lParam);
 BOOL EnumLangsFunc(HMODULE hModule, LPTSTR lpType, LPTSTR lpName, WORD wLang, LONG lParam);
 
 HMODULE loadLibraryEx(LPCTSTR lpFileName, HANDLE hFile, DWORD dwFlags);
-bool removeResource(QString exePath,  QString lpType, QString resourceName);
-bool addResourceBITMAP(QString executablePath, QString resourceName, QString resourcePath);
-bool updateResourceICO(QString executablePath, QString resourceName, QString resourcePath);
+bool removeResource(const QString& exePath,  const QString& lpType, const QString& resourceName);
+bool addResourceBITMAP(const QString &executablePath, const QString &resourceName, const QString &resourcePath);
+bool updateResourceICO(const QString& executablePath, const QString& resourceName, const QString& resourcePath);
 
 namespace icons
 {
@@ -507,7 +507,7 @@ HMODULE loadLibraryEx(LPCTSTR lpFileName, HANDLE hFile, DWORD dwFlags)
 }
 
 // ----------------------------------------------------------------------------------
-bool removeResource(QString executablePath, QString resourceType, QString resourceName)
+bool removeResource(const QString &executablePath, const QString &resourceType, const QString &resourceName)
 {
   char* exePath = (char*) malloc(executablePath.size() + 1);
     strcpy(exePath, executablePath.toLatin1().constData());
@@ -553,7 +553,7 @@ bool removeResource(QString executablePath, QString resourceType, QString resour
 }
 
 // ----------------------------------------------------------------------------------
-bool addResourceBITMAP(QString executablePath, QString resourceName, QString resourcePath)
+bool addResourceBITMAP(const QString& executablePath, const QString& resourceName, const QString& resourcePath)
 {
 	// Load file
 	// Get the bmp into memory
@@ -621,7 +621,7 @@ bool addResourceBITMAP(QString executablePath, QString resourceName, QString res
 }
 
 // ----------------------------------------------------------------------------------
-bool updateResourceICO(QString executablePath, QString resourceName, QString resourcePath)
+bool updateResourceICO(const QString &executablePath, const QString &resourceName, const QString &resourcePath)
 {
   char* resPath = (char*) malloc(resourcePath.size() + 1);
   strcpy(resPath, resourcePath.toLatin1().constData());
