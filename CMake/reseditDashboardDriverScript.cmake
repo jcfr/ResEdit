@@ -31,6 +31,9 @@ set(expected_variables
 if(WITH_DOCUMENTATION)
   list(APPEND expected_variables DOCUMENTATION_ARCHIVES_OUTPUT_DIRECTORY)
 endif()
+if(WITH_PACKAGES)
+  list(APPEND expected_variables MIDAS_PACKAGES_CREDENTIAL_FILE)
+endif()
 
 if(NOT DEFINED MIDAS_PACKAGES_URL)
   set(MIDAS_PACKAGES_URL "http://packages.kitware.com")
@@ -257,11 +260,13 @@ macro(run_ctest)
     if(WITH_PACKAGES AND (run_ctest_with_packages OR run_ctest_with_upload))
       message("----------- [ WITH_PACKAGES and UPLOAD ] -----------")
 
-      if("$ENV{MIDAS_PACKAGES_API_EMAIL}" STREQUAL "")
-        message(FATAL_ERROR "Failed to upload package - MIDAS_PACKAGES_API_EMAIL environment variable not set !")
+      include(${MIDAS_PACKAGES_CREDENTIAL_FILE})
+
+      if("${MIDAS_PACKAGES_API_EMAIL}" STREQUAL "")
+        message(FATAL_ERROR "Failed to upload package - MIDAS_PACKAGES_API_EMAIL variable not set !")
       endif()
-      if("$ENV{MIDAS_PACKAGES_API_KEY}" STREQUAL "")
-        message(FATAL_ERROR "Failed to upload package - MIDAS_PACKAGES_API_KEY environment variable not set !")
+      if("${MIDAS_PACKAGES_API_KEY}" STREQUAL "")
+        message(FATAL_ERROR "Failed to upload package - MIDAS_PACKAGES_API_KEY variable not set !")
       endif()
 
       if(build_errors GREATER "0")
@@ -326,8 +331,8 @@ macro(run_ctest)
             message("Uploading [${PACKAGE_NAME}] on [${MIDAS_PACKAGES_URL}]")
             midas_api_package_upload(
               API_URL ${MIDAS_PACKAGES_URL}
-              API_EMAIL $ENV{MIDAS_PACKAGES_API_EMAIL}
-              API_KEY $ENV{MIDAS_PACKAGES_API_KEY}
+              API_EMAIL ${MIDAS_PACKAGES_API_EMAIL}
+              API_KEY ${MIDAS_PACKAGES_API_KEY}
               FILE ${p}
               NAME ${PACKAGE_NAME}
               FOLDER_ID ${MIDAS_PACKAGES_FOLDER_ID}
