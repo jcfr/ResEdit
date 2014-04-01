@@ -366,7 +366,7 @@ int main(int argc, char* argv[])
     QTextStream(stdout, QIODevice::WriteOnly) << "CTKResEdit version "CTKResEdit_VERSION << "\n";
     return EXIT_SUCCESS;
     }
-  else if (parsedArgs.contains("help") || parsedArgs.contains("h"))
+  else if (parsedArgs.contains("help") || parsedArgs.contains("h") || parsedArgs.size() == 0)
     {
     QTextStream(stdout, QIODevice::WriteOnly) << commandLine.helpText() << "\n";
     return EXIT_SUCCESS;
