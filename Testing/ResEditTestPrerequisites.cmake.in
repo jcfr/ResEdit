@@ -15,18 +15,18 @@ set(EXIT_FAILURE 1)
 # --------------------------------------------------------------------------
 # Recover the Build Type
 set(build_types
-	"Debug"
-	"MinSizeRel"
-	"Release"
-	"RelWithDebInfo"
-	)
+  "Debug"
+  "MinSizeRel"
+  "Release"
+  "RelWithDebInfo"
+  )
 foreach (type ${build_types})
-	if(EXISTS ${resedit_binary_dir}/${type}/${resedit_name}.exe)
-		set(resedit_build_type ${type})
+  if(EXISTS ${resedit_binary_dir}/${type}/${resedit_name}.exe)
+    set(resedit_build_type ${type})
   endif()
 endforeach()
 if(NOT resedit_build_type)
-	message(FATAL_ERROR "No build type find - Type : ${resedit_build_type}")
+  message(FATAL_ERROR "No build type find - Type : ${resedit_build_type}")
 endif()
 
 set(resedit_dir ${resedit_binary_dir}/${resedit_build_type})

@@ -57,14 +57,14 @@ find_package(Qt4 4.7 REQUIRED)
 include(${QT_USE_FILE})
 
 set(ResEdit_SRCS
-	ctkCommandLineParser.cpp
-	ctkCommandLineParser.h
+  ctkCommandLineParser.cpp
+  ctkCommandLineParser.h
   Main.cpp
   )
 
 set(ResEdit_MOC_SRCS
-	ctkCommandLineParser.h
-	)
+  ctkCommandLineParser.h
+  )
 
 QT4_WRAP_CPP(ResEditQt_SRCS ${ResEdit_MOC_SRCS})
 
@@ -105,17 +105,17 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${ResEdit_C_REQUIRED_FLAGS}")
 # Remove warning for not using the _s
 if(MSVC)
 add_definitions(
-	-D_CRT_SECURE_NO_WARNINGS
-	)
+  -D_CRT_SECURE_NO_WARNINGS
+  )
 endif()
 
 # --------------------------------------------------------------------------
 # Include dirs
 #
 set(include_dirs
-	${CMAKE_CURRENT_SOURCE_DIR}
-	${CMAKE_CURRENT_BINARY_DIR}
-	)
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_BINARY_DIR}
+  )
 include_directories(${include_dirs})
 
 # --------------------------------------------------------------------------
