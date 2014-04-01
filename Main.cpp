@@ -269,18 +269,24 @@ namespace icons
       {
       res=UpdateResource(hUpdate,RT_ICON,MAKEINTRESOURCE(lpGrpIconDir->idEntries[i].nID),langId,pIconImage[i],lpGrpIconDir->idEntries[i].dwBytesInRes);
       if(res==false)
+        {
         QTextStream(stderr, QIODevice::WriteOnly) << "error UpdateResource RT_ICON " << lpFileName << "\n";
+        }
       }
 
     for(i=lpGrpIconDir->idCount;i<lpInitGrpIconDir->idCount;++i)
       {
       res=UpdateResource(hUpdate,RT_ICON,MAKEINTRESOURCE(lpInitGrpIconDir->idEntries[i].nID),langId,NULL,0);
       if(res==false)
+        {
         QTextStream(stderr, QIODevice::WriteOnly) << "error deleting resource " << lpFileName << "\n";
+        }
       }
 
     if(!EndUpdateResource(hUpdate,FALSE)) //false ->resource updates will take effect.
+      {
       QTextStream(stderr, QIODevice::WriteOnly) << "error EndUpdateResource" << lpFileName << "\n";
+      }
 
     // FreeResource(hGlobal);
     delete[] lpGrpIconDir->idEntries;
