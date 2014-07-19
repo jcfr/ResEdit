@@ -30,5 +30,7 @@ if(GIT_EXECUTABLE)
       set(CTKResEdit_VERSION_SOURCE "${CTKResEdit_VERSION_SOURCE}-dirty")
     endif()
   endif()
+else()
+  message(WARNING "GIT_EXECUTABLE not found. CTKAppLauncher_VERSION_SOURCE default to 'unknown'.")
 endif()
 
